@@ -2,7 +2,7 @@
 
 https://mubu.com/doc/t40F-z5vI0
 
-![思维导图](week01/frontend-mindmap.png)
+![思维导图](/frontend-mindmap.png)
 
 
 ## HTML Entity
@@ -452,5 +452,3 @@ ECMA的类型分为两种：基础类型，和内部类型。
 - The Property DEscriptor Specification Type
 - Lexical Environment and Environment Record Specification Types
 - Data Blocks
-
-## 
