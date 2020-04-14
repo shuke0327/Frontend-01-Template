@@ -2,7 +2,7 @@
 
 https://mubu.com/doc/t40F-z5vI0
 
-![思维导图](/frontend-mindmap.png)
+![思维导图](https://github.com/shuke0327/Frontend-01-Template/blob/master/week01/frontend-mindmap.png)
 
 
 ## HTML Entity
