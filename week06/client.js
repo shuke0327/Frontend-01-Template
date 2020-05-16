@@ -1,5 +1,5 @@
 const net = require('net');
-
+const parser = require('./parser.js');
 class Request {
     // method, url = host + port + path
     // body: key/value
@@ -262,8 +262,8 @@ void async function () {
         }
     });
     let response = await request.send();
+    let dom = parser.parseHTML(response.body);
     console.log('=====================');
     console.log('==== Parsed Data ====');
     console.log('=====================');
-    console.log(response);
 }();
