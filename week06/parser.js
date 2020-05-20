@@ -1,13 +1,31 @@
+const css = require('css');
+const EOF = Symbol('EOF'); // EOF: End of File
+
+
 let currentToken = null;
 let currentAttribute = null;
 let currentTextNode = null;
-
-const EOF = Symbol('EOF'); // EOF: End of File
 
 let stack = [{
     type: 'document',
     children: []
 }];
+
+let rules = [];
+function addCSSRules(text) {
+    var ast = css.parse(text);
+    console.log(JSON.stringify(ast, null, "    "));
+    rules.push(...ast.stylesheet.rules);
+}
+
+function computeCSS(element) {
+    // use slice to copy the current status;
+    // use reverse
+    var elements = stack.slice().reverse();
+    console.log('----', element);
+    console.log('====', elements);
+
+}
 
 function emit(token) {
     let top = stack[stack.length - 1];
@@ -26,7 +44,10 @@ function emit(token) {
                 });
             }
         }
+        computeCSS(element);
+
         top.children.push(element);
+
         element.parent = top;
 
         if (!token.isSelfClosing)
@@ -40,6 +61,9 @@ function emit(token) {
             console.log('=======', top.tagName);
             throw new Error("Tag start end doesn't match!");
         } else {
+            if (top.tagName === 'style') {
+                addCSSRules(top.children[0].content);
+            }
             stack.pop();
         }
         currentTextNode = null;
