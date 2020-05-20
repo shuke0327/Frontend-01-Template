@@ -1,4 +1,4 @@
-const css = require('css');
+// const css = require('css');
 
 let currentToken = null;
 let currentAttribute = null;
@@ -12,80 +12,80 @@ let stack = [{
 }];
 
 let rules = [];
-function addCSSRules(text) {
+// function addCSSRules(text) {
 
-    const ast = css.parse(text);
-    rules.push(...ast.stylesheet.rules);
+//     const ast = css.parse(text);
+//     rules.push(...ast.stylesheet.rules);
 
-}
+// }
 
-function match(element, selector) {
-    if (!selector || !element.attributes) {
-        return false;
-    }
+// function match(element, selector) {
+//     if (!selector || !element.attributes) {
+//         return false;
+//     }
 
-    if (selector.charAt(0) === '#') {
-        let attr = element.attributes.filter(attr => attr.name === 'id')[0];
-        if (attr && attr.value === selector.replace('#', '')) {
-            return true;
-        }
-    } else if (selector.charAt(0) === '.') {
-        let attr = element.attributes.filter(attr => attr.name === 'class')[0];
-        if (attr && attr.value === selector.replace('.', '')) {
-            return true;
-        }
-    } else {
-        if (element.tagName === selector) {
-            return true;
-        }
-    }
-}
+//     if (selector.charAt(0) === '#') {
+//         let attr = element.attributes.filter(attr => attr.name === 'id')[0];
+//         if (attr && attr.value === selector.replace('#', '')) {
+//             return true;
+//         }
+//     } else if (selector.charAt(0) === '.') {
+//         let attr = element.attributes.filter(attr => attr.name === 'class')[0];
+//         if (attr && attr.value === selector.replace('.', '')) {
+//             return true;
+//         }
+//     } else {
+//         if (element.tagName === selector) {
+//             return true;
+//         }
+//     }
+// }
 
-function specificity() {
-    return 0;
-}
+// function specificity() {
+//     return 0;
+// }
 
-function computeCSS(element) {
-    let elements = stack.slice().reverse();
-    if (!element.computedStyle) {
-        element.computedStyle = {};
-    }
+// function computeCSS(element) {
+//     let elements = stack.slice().reverse();
+//     if (!element.computedStyle) {
+//         element.computedStyle = {};
+//     }
 
-    for (const rule of rules) {
-        let selectorParts = rule.selectors[0].split(" ").reverse();
+//     for (const rule of rules) {
+//         let selectorParts = rule.selectors[0].split(" ").reverse();
 
-        if (!match(element, selectorParts[0])) {
-            continue;
-        }
+//         if (!match(element, selectorParts[0])) {
+//             continue;
+//         }
 
-        let matched = false;
+//         let matched = false;
 
-        let j = 1;
-        for (let i = 0; i < elements.length; i++) {
-            if (match(elements[i], selectorParts[j])) {
-                j++;
-            }
-        }
+//         let j = 1;
+//         for (let i = 0; i < elements.length; i++) {
+//             if (match(elements[i], selectorParts[j])) {
+//                 j++;
+//             }
+//         }
 
-        if (j >= selectorParts.length) {
-            matched = true;
-        }
+//         if (j >= selectorParts.length) {
+//             matched = true;
+//         }
 
-        if (matched) {
-            // 如果匹配，加入
-            let computedStyle = element.computedStyle;
+//         if (matched) {
+//             // 如果匹配，加入
+//             let computedStyle = element.computedStyle;
 
-            for (const declaration of rule.declarations) {
-                if (!computedStyle[declaration.property]) {
-                    computedStyle[declaration.property] = {};
-                }
+//             for (const declaration of rule.declarations) {
+//                 if (!computedStyle[declaration.property]) {
+//                     computedStyle[declaration.property] = {};
+//                 }
 
-                computedStyle[declaration.property].value = declaration.value;
-            }
-            // console.log(element.computedStyle);
-        }
-    }
-}
+//                 computedStyle[declaration.property].value = declaration.value;
+//             }
+//             // console.log(element.computedStyle);
+//         }
+//     }
+// }
 
 function emit(token) {
     let top = stack[stack.length - 1];
@@ -109,7 +109,7 @@ function emit(token) {
             }
         }
 
-        computeCSS(element);
+        // computeCSS(element);
 
         top.children.push(element);
         element.parent = top;
@@ -128,9 +128,9 @@ function emit(token) {
 
         } else {
 
-            if (top.tagName === 'style') {
-                addCSSRules(top.children[0].content);
-            }
+            // if (top.tagName === 'style') {
+            //     addCSSRules(top.children[0].content);
+            // }
             stack.pop();
         }
 
@@ -266,12 +266,9 @@ function selfClosingStartTag(c) {
 }
 
 function beforeAttributeName(c) {
-
     if (c.match(/^[\t\n\f ]$/)) {
-
         return beforeAttributeName;
-
-    } else if (c === '/' || c === '>' || c === EOF) {
+    } else if (c === "/" || c === ">" || c === EOF) {
 
         return afterAttributeName(c);
 
@@ -291,183 +288,124 @@ function beforeAttributeName(c) {
 }
 
 function afterAttributeName(c) {
-
     if (c.match(/^[\t\n\f ]$/)) {
-
         return afterAttributeName;
-
-    } else if (c === '/') {
-
+    } else if (c === "/") {
         return selfClosingStartTag;
-
-    } else if (c === '=') {
-
+    } else if (c === "=") {
         return beforeAttributeValue;
-
-    } else if (c === '>') {
-
+    } else if (c === ">") {
         currentToken[currentAttribute.name] = currentAttribute.value;
         emit(currentToken);
         return data;
-
     } else if (c === EOF) {
-
         return selfClosingStartTag;
-
     } else {
-
         currentToken[currentAttribute.name] = currentAttribute.value;
         currentAttribute = {
-            name: '',
-            value: ''
+            name: "",
+            value: ""
         }
-
         return attributeName(c);
     }
 }
 
+
 function attributeName(c) {
-    if (c.match(/^[\t\n\f ]$/) || c === '/' || c === '>' || c === EOF) {
-
+    if (c.match(/^[\t\n\f ]$/) || c === "/" || c === ">" || c === EOF) {
         return afterAttributeName(c);
-
-    } else if (c === '=') {
-
+    } else if (c === "=") {
         return beforeAttributeValue;
+    } else if (c === "\u0000") {
 
-    } else if (c === '\u0000') {
-
-        // throw new Error('Wrong style');
-
-    } else if (c === "\"" || c === "'" || c === '<') {
-
-        // throw new Error('Wrong style');
+    } else if (c === "\"" || c === "'" || c === "<") {
 
     } else {
-
         currentAttribute.name += c;
         return attributeName;
-
     }
 }
+
+
 
 function beforeAttributeValue(c) {
-
-    if (c.match(/^[\t\n\f ]$/) || c === '/' || c === '>' || c === EOF) {
-
+    if (c.match(/^[\t\n\f ]$/) || c === "/" || c === ">" || c === EOF) {
         return beforeAttributeValue;
-
-    } else if (c === '\"') {
-
+    } else if (c === "\"") {
         return doubleQuotedAttributeValue;
-
-    } else if (c === '\'') {
-
+    } else if (c === "\'") {
         return singleQuotedAttributeValue;
-
-    } else if (c === '>') {
-
+    } else if (c === ">") {
         return data;
-
     } else {
-
         return unquotedAttributeValue(c);
-
     }
 }
 
+
 function doubleQuotedAttributeValue(c) {
-
-    if (c === '\"') {
-
+    if (c === "\"") {
         currentToken[currentAttribute.name] = currentAttribute.value;
         return afterQuotedAttributeValue;
-
-    } else if (c === '\u0000') {
+    } else if (c === "\u0000") {
 
     } else if (c === EOF) {
-
     } else {
-
         currentAttribute.value += c;
         return doubleQuotedAttributeValue;
-
     }
+
 }
 
 function singleQuotedAttributeValue(c) {
-    if (c === '\'') {
-
+    if (c === "\'") {
         currentToken[currentAttribute.name] = currentAttribute.value;
         return afterQuotedAttributeValue;
-
-    } else if (c === '\u0000') {
+    } else if (c === "\u0000") {
 
     } else if (c === EOF) {
-
     } else {
-
         currentAttribute.value += c;
         return singleQuotedAttributeValue;
-
     }
 }
 
 function afterQuotedAttributeValue(c) {
-
     if (c.match(/^[\t\n\f ]$/)) {
-
         return beforeAttributeName;
-
-    } else if (c === '/') {
-
+    } else if (c === "/") {
         return selfClosingStartTag;
-
-    } else if (c === '>') {
-
+    } else if (c === ">") {
         currentToken[currentAttribute.name] = currentAttribute.value;
         emit(currentToken);
         return data;
-
     } else if (c === EOF) {
 
     } else {
-
         currentAttribute.value += c;
         return doubleQuotedAttributeValue;
-
     }
 }
 
 function unquotedAttributeValue(c) {
-
     if (c.match(/^[\t\n\f ]$/)) {
-
         currentToken[currentAttribute.name] = currentAttribute.value;
         return beforeAttributeName;
-
-    } else if (c === '/') {
-
+    } else if (c === "/") {
         currentToken[currentAttribute.name] = currentAttribute.value;
         return selfClosingStartTag;
-
-    } else if (c === '>') {
-
+    } else if (c === ">") {
         currentToken[currentAttribute.name] = currentAttribute.value;
         emit(currentToken);
         return data;
+    } else if (c === "\u0000") {
 
-    } else if (c === '\u0000') {
-
-    } else if (c === '\"' || c === "'" || c === '<' || c === '=' || c === "`") {
+    } else if (c === "\"" || c === "'" || c === "<" || c === "=" || c === "`") {
 
     } else if (c === EOF) {
-
     } else {
-
         currentAttribute.value += c;
         return unquotedAttributeValue;
-
     }
 }
 
