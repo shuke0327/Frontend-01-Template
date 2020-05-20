@@ -1,5 +1,6 @@
 const net = require('net');
 const parser = require('./parser.js');
+
 class Request {
     // method, url = host + port + path
     // body: key/value
@@ -18,7 +19,7 @@ class Request {
         if (this.headers["Content-Type" === "application/json"])
             this.bodyText = JSON.stringify(this.body);
         else if (this.headers["Content-Type"] === "application/x-www-form-urlencoded")
-            this.bodyText = Object.keys(this.body).map(key => `${key}=${encodeURIComponent(this.body[key])}`).join('\r\n');
+            this.bodyText = Object.keys(this.body).map(key => `${key}=${encodeURIComponent(this.body[key])}`).join('&');
         this.headers["Content-Length"] = this.bodyText.length;
     }
 
@@ -41,30 +42,16 @@ ${this.bodyText}`
                 console.log('= Connection Write Data =');
                 console.log('=====================');
                 connection.write(this.toString());
-                console.log(this.toString());
             });
             // process data
             connection.on('data', (data) => {
                 parser.receive(data.toString());
                 if (parser.isFinished) {
-                    resolve(parser.getResponse);
+                    resolve(parser.response);
                 }
                 // print statusLine from response
-                console.log(parser.statusLine);
+                // console.log(parser.statusLine);
                 // print headerLine from response
-                console.log("\n");
-                console.log("=================");
-                console.log("==RAW   VERSION==");
-                console.log("=================");
-                console.log("\n");
-                console.log(parser.headers);
-                console.log("\n");
-                console.log("=================");
-                console.log("==TIDY  VERSION==");
-                console.log("=================");
-                console.log("\n");
-                console.log(Object.keys(parser.headers).map((key) => `${key}${parser.headers[key]}`).join('\r\n'));
-                // resolve(data.toString());
                 connection.end();
             });
             // process error
@@ -110,7 +97,7 @@ class ResponseParser {
         return this.bodyParser && this.bodyParser.isFinished;
     }
 
-    get getResponse() {
+    get response() {
         this.statusLine.match(/HTTP\/1.1 ([0-9]+) ([\s\S]+)/);
         return {
             statusCode: RegExp.$1,
@@ -132,9 +119,6 @@ class ResponseParser {
         if (this.current === this.WAITING_STATUS_LINE) {
             if (char === '\r') {
                 this.current = this.WAITING_STATUS_LINE_END;
-            }
-            if (char === '\n') {
-                this.current = this.WAITING_HEADER_NAME;
             } else {
                 this.statusLine += char;
             }
@@ -256,9 +240,7 @@ void async function () {
             ["X-Foo2"]: "hello,world"
         },
         body: {
-            name: "Leaner",
-            age: "19",
-            sex: "male"
+            name: "Leaner"
         }
     });
     let response = await request.send();
@@ -266,4 +248,5 @@ void async function () {
     console.log('=====================');
     console.log('==== Parsed Data ====');
     console.log('=====================');
+    console.log(dom);
 }();
